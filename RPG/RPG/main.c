@@ -23,8 +23,15 @@ typedef struct Character {
 	int coin;
 
 }Character;
+typedef struct Monster {
+	int x, y;
+	int hp;
+	int move[2], jum, delay;
+	int bottem;
+}Monster;
 
 Character character;
+Monster* monster_obj;
 
 void StartMenu();
 void Gotoxy(int x, int y); // 마우스 커서 위치를 변경하는 함수
@@ -36,20 +43,25 @@ void CharacterSituation(int stage);
 void GameMapUi(int floor);
 void CharacterClear(int x, int y);
 void StageMenu();
+void MonsterDesgin(int mon_c);
+void MonsterClear(int mon_c);
 
 
 int main(void) {
 
+	CursorView(0);
+	character.coin = 20;
+	character.weapoon_choose = 0; // 기본 무기 상태 
 
 	while (true) {
-		CursorView(0);
 		StartMenu();
 		int menu_select = _getch();	// 입력받는 키보드값 저장
 		system("cls");
 		switch (menu_select)		// 저장한 값을 통해 해당하는 번호로 이동
 		{
 		case MENU_SELECT_ONE:
-			CharacterSituation(1);
+			StageMenu();
+			system("cls");
 			break;
 		case MENU_SELECT_TWO:
 			Store();
@@ -71,12 +83,26 @@ void CharacterSituation(int stage) {
 	int Bottom = true;	// 캐릭터가 바닥에 있는지
 	int gravity = 2;
 	int direction = true;  // 방향 true 오른쪽 , false 왼쪽
-
+	int monster_count = 0;
 	character.attack_mosion[1] = 0;
 	character.hpmax = 100; // 캐릭터 최대 체력
 	character.mpmax = 50; // 캐릭터 최대 마나
 	character.hp = character.hpmax;
 	character.mp = character.mpmax;
+	monster_count = 1;
+
+	monster_obj[0].x = 50;
+	monster_obj[0].y = 23;
+
+	monster_obj[0].move[0] = 0;	// 슬라임 기본 점프 시간
+	monster_obj[0].move[1] = false; // 몬스터가 공격 당했을때 살짝 띄움
+	monster_obj[0].jum = false;
+	monster_obj[0].hp = 100;
+	monster_obj[0].delay = 0;
+	monster_obj[0].bottem = true;	// 몬스터가 바닥에 있는지
+
+	if (character.weapoon_choose == 0) character.power = 15;
+	if (character.weapoon_choose == 1) character.power = 50;
 
 	GameMapUi(true);
 	GameMapUi(false);
@@ -150,6 +176,30 @@ void CharacterSituation(int stage) {
 	}
 
 	
+}
+
+void MonsterDesgin(int mon_c) {
+	char mon_spr[13] = " __ (  )----";
+	Gotoxy(monster_obj[mon_c].x, monster_obj[mon_c].y - 3);
+	printf("%d", monster_obj[mon_c].hp);
+	int next_line = 0;
+	if (monster_obj[mon_c].jum) {
+		mon_spr[4] = '['; mon_spr[7] = ']';
+		mon_spr[8] = '\''; mon_spr[11] = '\'';
+	}
+	for (int i = 2; i >= 0; i--) {
+		for (int j = 0; j < 4; j++) {
+			Gotoxy(monster_obj[mon_c].x + j, monster_obj[mon_c].y - i);
+			printf("%c", mon_spr[j + next_line]);
+		}
+		next_line += 4;
+	}
+}
+void MonsterClear(int mon_c) {
+	for (int i = 3; i >= 0; i--) {
+		Gotoxy(monster_obj[mon_c].x, monster_obj[mon_c].y - i);
+		printf("    ");
+	}
 }
 void CharacterDesgin(int x, int y, int direction, int charact_leg) {
 	char sprite[10] = " 0 (|)_^_";	// 캐릭 초기 디자인
