@@ -328,7 +328,7 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 		// 오른쪽
 		if (direction && monster_obj[mon_c].x >= charact_X && charact_Y - 3 >= monster_obj[mon_c].y - 3) {
 			if (monster_obj[mon_c].x <= charact_X + 7) {
-				monster_obj[mon_c].hp -= character.power;
+				monster_obj[mon_c].hp -= character.power;  // 몬스터 Hp 감소
 				monster_obj[mon_c].move[1] = true;	// 어택했을 때 몬스터 점프
 			}
 			if (monster_obj[mon_c].y < charact_Y - 3) monster_obj[mon_c].hp += 10;	// 몬스터가 캐릭 위에 있는데 공격 했을 경우
@@ -342,6 +342,9 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 			if (monster_obj[mon_c].y < charact_Y - 3) monster_obj[mon_c].hp += 10;	// 몬스터가 캐릭 위에 있는데 공격 했을 경우
 		}
 		monster_obj[mon_c].delay = 0;
+	}
+	if (monster_obj[mon_c].hp <= 0) {	// 몬스터를 잡을 때마다 코인 획득
+		character.coin += 20;
 	}
 	character.ch_del++;
 	// 몬스터에게 닿았을 때 캐릭터 hp 감소
@@ -623,14 +626,6 @@ void Store() {
 			}
 		}
 	}
-}
-void Gameover(int win) { // you와 die를 같이쓰면 들여쓰기가 돼서 분리
-	Gotoxy(10, 10); printf("●     ●     ●      ●     ●");
-	Gotoxy(10, 11); printf(" ●   ●    ●   ●    ●     ●");
-	Gotoxy(10, 12); printf("  ● ●    ●     ●   ●     ●");
-	Gotoxy(10, 13); printf("   ●     ●     ●   ●     ●");
-	Gotoxy(10, 14); printf("   ●      ●   ●     ●   ● ");
-	Gotoxy(10, 15); printf("   ●        ●        ●●●  ");
 }
 void StageMenu() {
 	int menu = 0;
