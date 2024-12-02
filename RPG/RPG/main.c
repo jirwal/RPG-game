@@ -7,6 +7,9 @@
 #define MENU_SELECT_TWO 50
 #define MENU_SELECT_THREE 51
 #define MENU_SELECT_FOUR 52
+// 게임 화면 크기
+#define MAP_X_MAX 100		
+#define MAP_Y_MAX 27
 
 #define BACK 112 // 전 화면으로 되돌아가기
 #define PURCHASE 105	// 구매 키
@@ -15,6 +18,7 @@ void StartMenu();
 void Gotoxy(int x, int y); // 마우스 커서 위치를 변경하는 함수
 void CursorView(char show);
 void GameExplanation();
+void Store();
 
 int main(void) {
 
@@ -26,7 +30,7 @@ int main(void) {
 		switch (menu_select)		// 저장한 값을 통해 해당하는 번호로 이동
 		{
 		case MENU_SELECT_ONE:
-
+			GameMapUi(true);
 			break;
 		case MENU_SELECT_TWO:
 			Store();
@@ -115,6 +119,24 @@ void Store() {
 			}
 			else {
 				Gotoxy(22, 8); printf("* 코인이 부족합니다.");
+			}
+		}
+	}
+}
+void GameMapUi(int floor) {
+	if (floor == true) {
+		for (int i = 0; i < MAP_X_MAX; i++) {
+			Gotoxy(i, MAP_Y_MAX + 1);
+			printf("■");
+		}
+		for (int y = 0; y < 9; y++) {
+			Gotoxy(2, y); printf("|                                           |");
+			if (y == 0) {
+				Gotoxy(2, y); printf("┌-------------------------------------------┐");
+			}
+			if (y == 8)
+			{
+				Gotoxy(2, y); printf("└-------------------------------------------┘");
 			}
 		}
 	}
