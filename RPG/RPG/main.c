@@ -45,6 +45,7 @@ void CharacterClear(int x, int y);
 void StageMenu();
 void MonsterDesgin(int mon_c);
 void MonsterClear(int mon_c);
+void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c);
 
 
 int main(void) {
@@ -170,12 +171,82 @@ void CharacterSituation(int stage) {
 		if (character.hp <= 0)
 			character.hp = 0;
 
+		MonsterSituation(direction, charact_X, charact_Y, 0);
+
 		GameMapUi(false);
 		CharacterDesgin(charact_X, charact_Y, direction, charact_leg);
+		MonsterDesgin(0);
 		Sleep(50);
 	}
 
 	
+}
+void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
+	int gravity = 2;
+	int delay_jum = 30;
+	// 몬스터 별로 점프 시간을 다르게 하기
+	if (mon_c == 1) delay_jum = 50;
+	if (mon_c == 2) delay_jum = 20;
+
+	monster_obj[mon_c].move[0]++;		// 점프 시간을 맞추기 위해 증가
+	if (monster_obj[mon_c].move[0] >= delay_jum && monster_obj[mon_c].bottem == true) { // 몬스터 점프 하게 만들기
+		monster_obj[mon_c].y -= gravity;
+		monster_obj[mon_c].jum = true;			// 몬스터 점프 모션 디자인으로 변경
+		if (monster_obj[mon_c].x > charact_X) monster_obj[mon_c].x -= 4; // 캐릭쪽으로 
+		if (monster_obj[mon_c].x < charact_X) monster_obj[mon_c].x += 4;
+		// 점프가 끝나면 시간 초기화
+		if (monster_obj[mon_c].move[0] > delay_jum + 1) monster_obj[mon_c].move[0] = 0;
+
+	}
+	else monster_obj[mon_c].y += gravity;
+
+	if (monster_obj[mon_c].y >= MAP_Y_MAX) {
+		monster_obj[mon_c].y = MAP_Y_MAX;
+		monster_obj[mon_c].jum = false;	// 기본 이미지로 변경
+		monster_obj[mon_c].bottem = true;
+	}
+	// 몬스터 어택 관련
+	monster_obj[mon_c].delay++;
+	if (character.attack_mosion[mon_c] && monster_obj[mon_c].delay > 20 && monster_obj[mon_c].jum == false) {
+		// 오른쪽
+		if (direction && monster_obj[mon_c].x >= charact_X && charact_Y - 3 >= monster_obj[mon_c].y - 3) {
+			if (monster_obj[mon_c].x <= charact_X + 7) {
+				monster_obj[mon_c].hp -= character.power;
+				monster_obj[mon_c].move[1] = true;	// 어택했을 때 몬스터 점프
+			}
+			if (monster_obj[mon_c].y < charact_Y - 3) monster_obj[mon_c].hp += 10;	// 몬스터가 캐릭 위에 있는데 공격 했을 경우
+		}
+		// 왼쪽
+		if (direction == false && monster_obj[mon_c].x <= charact_X && charact_Y - 3 >= monster_obj[mon_c].y - 3) {
+			if (monster_obj[mon_c].x + 4 > charact_X - 4) {
+				monster_obj[mon_c].hp -= character.power;
+				monster_obj[mon_c].move[1] = true; // 어택했을 때 몬스터 점프
+			}
+			if (monster_obj[mon_c].y < charact_Y - 3) monster_obj[mon_c].hp += 10;	// 몬스터가 캐릭 위에 있는데 공격 했을 경우
+		}
+		monster_obj[mon_c].delay = 0;
+	}
+	// 몬스터에게 닿았을 때 캐릭터 hp 감소
+	if (monster_obj[mon_c].x >= charact_X) {
+		if (monster_obj[mon_c].x <= charact_X + 3 && charact_Y > monster_obj[mon_c].y - 3)
+			character.hp -= 1;
+	}
+	else {
+		if (monster_obj[mon_c].x + 4 >= charact_X && charact_Y > monster_obj[mon_c].y - 3)
+			character.hp -= 1;
+	}
+	// 오른쪽을 보고 때렸을 때
+	if (monster_obj[mon_c].move[1]) {
+		monster_obj[mon_c].y -= 3;
+		if (direction) monster_obj[mon_c].x += 1;	// 오른쪽으로 넉백
+		else monster_obj[mon_c].x -= 1;	// 왼쪽으로 넉백
+		monster_obj[mon_c].jum = true;
+		monster_obj[mon_c].bottem = false;
+	}
+
+	if (monster_obj[mon_c].delay >= 3) {
+		monster_obj[mon_c].move[1] = false;
+	}
 }
 
 void MonsterDesgin(int mon_c) {
