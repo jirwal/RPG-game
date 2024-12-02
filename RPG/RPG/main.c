@@ -14,11 +14,27 @@
 #define BACK 112 // 전 화면으로 되돌아가기
 #define PURCHASE 105	// 구매 키
 
+typedef struct Character {
+	int hpmax, mpmax;
+	int hp, mp;
+	int attack_mosion[2];  // 어택 모션
+	int weapoon_choose;		// 무기 종류
+	int power;				// 데미지
+	int coin;
+
+}Character;
+
+Character character;
+
 void StartMenu();
 void Gotoxy(int x, int y); // 마우스 커서 위치를 변경하는 함수
 void CursorView(char show);
 void GameExplanation();
 void Store();
+void CharacterDesgin(int x, int y);
+void CharacterSituation(int stage);
+void GameMapUi();
+
 
 int main(void) {
 
@@ -30,7 +46,7 @@ int main(void) {
 		switch (menu_select)		// 저장한 값을 통해 해당하는 번호로 이동
 		{
 		case MENU_SELECT_ONE:
-			GameMapUi(true);
+			CharacterSituation(1);
 			break;
 		case MENU_SELECT_TWO:
 			Store();
@@ -45,6 +61,32 @@ int main(void) {
 		}
 	}
 }
+void CharacterSituation(int stage) {
+	int charact_X = 40, charact_Y = 17;
+
+	GameMapUi(true);
+	while (true) {
+
+
+		CharacterDesgin(charact_X, charact_Y);
+	}
+
+	
+}
+void CharacterDesgin(int x, int y) {
+	char sprite[10] = " 0 (|)_^_";	// 캐릭 초기 디자인
+
+	int next_line = 0;		// 캐릭터 디자인 배열을 3개 단위로 끊어서 출력하기 위한 기준값
+	for (int i = 2; i >= 0; i--) {
+		Gotoxy(x, y - i);
+		for (int j = 0; j < 3; j++) {
+			Gotoxy(x + j, y - i);
+			printf("%c", sprite[next_line + j]);
+		}
+		next_line += 3;
+	}
+}
+
 void StartMenu() {
 
 	printf("=========================== 시 작 메 뉴 ===========================\n\n\n");
