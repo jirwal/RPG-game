@@ -35,6 +35,7 @@ void CharacterDesgin(int x, int y, int direction, int charact_leg);
 void CharacterSituation(int stage);
 void GameMapUi(int floor);
 void CharacterClear(int x, int y);
+void StageMenu();
 
 
 int main(void) {
@@ -385,5 +386,42 @@ void GameMapUi(int floor) {
 			Gotoxy(36, 6); printf("| '+.  |");
 		}
 		Gotoxy(36, 7); printf("'------'");
+	}
+}
+void StageMenu() {
+	int menu = 0;
+
+	while (menu != BACK) {
+		Gotoxy(0, 0); printf("< 스테이지 >");
+		Gotoxy(5, 3); printf(".-------.\n");
+		Gotoxy(5, 4); printf("|  /|   |\n");
+		Gotoxy(5, 5); printf("|   |   |\n");
+		Gotoxy(5, 6); printf("|  -┴-  |\n");
+		Gotoxy(5, 7); printf("\'-------\'\n");
+		Gotoxy(4, 8); printf("(단축키:1)");
+
+		Gotoxy(18, 3); printf(".-------.\n");
+		Gotoxy(18, 4); printf("|  --┐  |\n");
+		Gotoxy(18, 5); printf("|  ┌-┘  |\n");
+		Gotoxy(18, 6); printf("|  └--  |\n");
+		Gotoxy(18, 7); printf("\'-------\'\n");
+		Gotoxy(18, 8); printf("(단축키:2)");
+
+		Gotoxy(30, 12); printf("( p : 메뉴로 되돌아가기)");
+		menu = _getch();
+
+		if (menu == MENU_SELECT_ONE)
+		{
+			Gotoxy(30, 12); printf("                        ");
+			CharacterSituation(1);	// 1스테이지 정보 넘기기
+		}
+		if (menu == MENU_SELECT_TWO) {
+			if (character.weapoon_choose == 1) {
+				CharacterSituation(2);	// 2스테이지 정보 넘기기
+			}
+			else {
+				Gotoxy(18, 1); printf("* 상점에서 무기 구매 후 입장가능합니다.");
+			}
+		}
 	}
 }
