@@ -31,7 +31,7 @@ void Gotoxy(int x, int y); // 마우스 커서 위치를 변경하는 함수
 void CursorView(char show);
 void GameExplanation();
 void Store();
-void CharacterDesgin(int x, int y);
+void CharacterDesgin(int x, int y, int direction, int charact_leg);
 void CharacterSituation(int stage);
 void GameMapUi(int floor);
 void CharacterClear(int x, int y);
@@ -42,7 +42,6 @@ int main(void) {
 
 	while (true) {
 		CursorView(0);
-
 		StartMenu();
 		int menu_select = _getch();	// 입력받는 키보드값 저장
 		system("cls");
@@ -66,9 +65,11 @@ int main(void) {
 }
 void CharacterSituation(int stage) {
 	int charact_X = 40, charact_Y = 17;
+	int charact_leg = 1;  // 캐릭터 기본 다리 모습
 	int Jump = false;	// 점프 여부
 	int Bottom = true;	// 캐릭터가 바닥에 있는지
 	int gravity = 2;
+	int direction = true;  // 방향 true 오른쪽 , false 왼쪽
 
 	GameMapUi(true);
 	while (true) {
@@ -79,17 +80,19 @@ void CharacterSituation(int stage) {
 		// 비동기로 처리 -> 호출된 시점에서 키 상태를 확인
 		// 메시지 큐를 거치지 않고 바로 리턴 해준다
 		// 캐릭터의 움직임을 누르는 즉시 입력 처리하기 위해 사용
-		CharacterClear(charact_X, charact_Y);
+		
+		// 키를 누르면 0x8000값을 리턴 키가 이미 눌려있으면 0x0001값을 리턴
+		// 키눌름 상태를 정확한 시점에서 체크하기위해 AND연산 사용
 		// 키를 누르면 0x8000값을 리턴 키가 이미 눌려있으면 0x0001값을 리턴
 		// 키눌름 상태를 정확한 시점에서 체크하기위해 AND연산 사용
 		if (GetAsyncKeyState(VK_LEFT) & 0x8000 && charact_X > 4) {
 			charact_X -= 2;
-			
+			direction = false;
 			move = true;
 		}
 		if (GetAsyncKeyState(VK_RIGHT) & 0x8000 && charact_X < MAP_X_MAX - 2) {
 			charact_X += 2;
-			
+			direction = true;
 			move = true;
 		}
 		// 스페이스 눌렀을때 바닥이면 점프
@@ -110,23 +113,56 @@ void CharacterSituation(int stage) {
 		// 점프의 최고 높이를 찍으면 점프 끝
 		if (charact_Y <= 20) Jump = false;	//10 이름 바꾸기
 
+		if (move)	// 움직임이 있으면 캐릭터의 leg를 증가 (모양 변경)
+			charact_leg++;
+		else		// 움직임이 없으면 기본 디자인으로 출력
+			charact_leg = 0;
 
-		CharacterDesgin(charact_X, charact_Y);
+		// 디자인해 놓은 다리 모양 3개가 넘어갈시 1부터 가시
+		if (charact_leg > 3)
+			charact_leg = 1;
+
+		CharacterDesgin(charact_X, charact_Y, direction, charact_leg);
+		Sleep(50);
 	}
 
 	
 }
-void CharacterDesgin(int x, int y) {
+void CharacterDesgin(int x, int y, int direction, int charact_leg) {
 	char sprite[10] = " 0 (|)_^_";	// 캐릭 초기 디자인
 
-	int next_line = 0;		// 캐릭터 디자인 배열을 3개 단위로 끊어서 출력하기 위한 기준값
-	for (int i = 2; i >= 0; i--) {
-		Gotoxy(x, y - i);
-		for (int j = 0; j < 3; j++) {
-			Gotoxy(x + j, y - i);
-			printf("%c", sprite[next_line + j]);
+	sprite[4] = '|'; sprite[6] = '_'; sprite[8] = '_';
+
+	if (direction) { // 오른쪽으로 움직이면 배열에 문자값 변경
+		sprite[3] = '('; sprite[5] = 'o';
+		switch (charact_leg)		// 계속 움직이면 캐릭터의 leg값이 증가해 해당 디자인으로 변경
+		{
+		case 1: sprite[6] = '.'; sprite[8] = '-'; break;
+		case 2: sprite[6] = '\''; sprite[8] = '_'; break;
+		case 3: sprite[6] = '.'; sprite[8] = '_'; break;
+		default: break;
 		}
-		next_line += 3;
+
+	}
+	else { // 왼쪽으로 움직이면 배열에 문자값 변경
+		sprite[3] = 'o'; sprite[5] = ')';
+		switch (charact_leg)
+		{
+		case 1: sprite[6] = '-'; sprite[8] = '.'; break;
+		case 2: sprite[6] = '_'; sprite[8] = '\''; break;
+		case 3: sprite[6] = '_'; sprite[8] = '.'; break;
+		default: break;
+		}
+
+		int next_line = 0;		// 캐릭터 디자인 배열을 3개 단위로 끊어서 출력하기 위한 기준값
+		for (int i = 2; i >= 0; i--) {
+			Gotoxy(x, y - i);
+			for (int j = 0; j < 3; j++) {
+				Gotoxy(x + j, y - i);
+				printf("%c", sprite[next_line + j]);
+			}
+			next_line += 3;
+		}
 	}
 }
 void CharacterClear(int x, int y) {	// 캐릭터 지우기(잔상 제거)
