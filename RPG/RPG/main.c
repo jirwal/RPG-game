@@ -33,13 +33,16 @@ void GameExplanation();
 void Store();
 void CharacterDesgin(int x, int y);
 void CharacterSituation(int stage);
-void GameMapUi();
+void GameMapUi(int floor);
+void CharacterClear(int x, int y);
 
 
 int main(void) {
 
 
 	while (true) {
+		CursorView(0);
+
 		StartMenu();
 		int menu_select = _getch();	// 입력받는 키보드값 저장
 		system("cls");
@@ -63,9 +66,49 @@ int main(void) {
 }
 void CharacterSituation(int stage) {
 	int charact_X = 40, charact_Y = 17;
+	int Jump = false;	// 점프 여부
+	int Bottom = true;	// 캐릭터가 바닥에 있는지
+	int gravity = 2;
 
 	GameMapUi(true);
 	while (true) {
+		int move = false;
+		// 대각선 점프 불가 및 여러가지 방향키를 한번이 인식 못함
+
+		// 다중 키 입력을 받기위해 GetAsyncKeyState함수 사용
+		// 비동기로 처리 -> 호출된 시점에서 키 상태를 확인
+		// 메시지 큐를 거치지 않고 바로 리턴 해준다
+		// 캐릭터의 움직임을 누르는 즉시 입력 처리하기 위해 사용
+		CharacterClear(charact_X, charact_Y);
+		// 키를 누르면 0x8000값을 리턴 키가 이미 눌려있으면 0x0001값을 리턴
+		// 키눌름 상태를 정확한 시점에서 체크하기위해 AND연산 사용
+		if (GetAsyncKeyState(VK_LEFT) & 0x8000 && charact_X > 4) {
+			charact_X -= 2;
+			
+			move = true;
+		}
+		if (GetAsyncKeyState(VK_RIGHT) & 0x8000 && charact_X < MAP_X_MAX - 2) {
+			charact_X += 2;
+			
+			move = true;
+		}
+		// 스페이스 눌렀을때 바닥이면 점프
+		if (GetAsyncKeyState(VK_UP) & 0x8000 && charact_Y == MAP_Y_MAX) {
+			Jump = true;
+			Bottom = false;
+		}
+		// 점프중이면 캐릭터 Y좌표 감소(위로)
+		if (Jump) charact_Y -= gravity;
+		// 끝나면 캐릭터 Y좌표 증가(아래로)
+		else charact_Y += gravity;
+
+		// Y값이 오류로 인해 계속 증가하면 바닥으로 이동
+		if (charact_Y >= MAP_Y_MAX) {
+			charact_Y = MAP_Y_MAX;
+			Bottom = true;
+		}
+		// 점프의 최고 높이를 찍으면 점프 끝
+		if (charact_Y <= 20) Jump = false;	//10 이름 바꾸기
 
 
 		CharacterDesgin(charact_X, charact_Y);
@@ -84,6 +127,11 @@ void CharacterDesgin(int x, int y) {
 			printf("%c", sprite[next_line + j]);
 		}
 		next_line += 3;
+	}
+}
+void CharacterClear(int x, int y) {	// 캐릭터 지우기(잔상 제거)
+	for (int i = 2; i >= 0; i--) {
+		Gotoxy(x - 4, y - i); printf("           ");
 	}
 }
 
