@@ -71,7 +71,14 @@ void CharacterSituation(int stage) {
 	int gravity = 2;
 	int direction = true;  // 방향 true 오른쪽 , false 왼쪽
 
+	character.attack_mosion[1] = 0;
+	character.hpmax = 100; // 캐릭터 최대 체력
+	character.mpmax = 50; // 캐릭터 최대 마나
+	character.hp = character.hpmax;
+	character.mp = character.mpmax;
+
 	GameMapUi(true);
+	GameMapUi(false);
 	while (true) {
 		int move = false;
 		// 대각선 점프 불가 및 여러가지 방향키를 한번이 인식 못함
@@ -122,6 +129,7 @@ void CharacterSituation(int stage) {
 		if (charact_leg > 3)
 			charact_leg = 1;
 
+		GameMapUi(false);
 		CharacterDesgin(charact_X, charact_Y, direction, charact_leg);
 		Sleep(50);
 	}
@@ -265,5 +273,25 @@ void GameMapUi(int floor) {
 				Gotoxy(2, y); printf("└-------------------------------------------┘");
 			}
 		}
+	}
+	else {
+		Gotoxy(4, 2); printf("[ H P ]");
+		Gotoxy(13, 2); printf("              ");
+		Gotoxy(13, 2); printf("%d / %d", character.hp, character.hpmax);
+		Gotoxy(4, 3); printf("[ M P ]");
+		Gotoxy(13, 3); printf("              ");
+		Gotoxy(13, 3); printf("%d / %d", character.mp, character.mpmax);
+		Gotoxy(4, 6); printf("[ Power ] : %d", character.power);
+		Gotoxy(25, 6); printf("coin : %d", character.coin);
+		Gotoxy(36, 3); printf("weapoon");
+		Gotoxy(36, 4); printf(".------.");
+		Gotoxy(36, 5); printf("|   /  |");
+		if (character.weapoon_choose == 0) {	// 기본 무기
+			Gotoxy(36, 6); printf("|  /   |");
+		}
+		else {	// 상점에서 무기를 산 경우
+			Gotoxy(36, 6); printf("| '+.  |");
+		}
+		Gotoxy(36, 7); printf("'------'");
 	}
 }
