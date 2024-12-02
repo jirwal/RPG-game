@@ -581,6 +581,14 @@ void Store() {
 		}
 	}
 }
+void Gameover(int win) { // you와 die를 같이쓰면 들여쓰기가 돼서 분리
+	Gotoxy(10, 10); printf("●     ●     ●      ●     ●");
+	Gotoxy(10, 11); printf(" ●   ●    ●   ●    ●     ●");
+	Gotoxy(10, 12); printf("  ● ●    ●     ●   ●     ●");
+	Gotoxy(10, 13); printf("   ●     ●     ●   ●     ●");
+	Gotoxy(10, 14); printf("   ●      ●   ●     ●   ● ");
+	Gotoxy(10, 15); printf("   ●        ●        ●●●  ");
+}
 void StageMenu() {
 	int menu = 0;
 
