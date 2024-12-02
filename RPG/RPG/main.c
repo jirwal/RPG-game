@@ -143,8 +143,8 @@ void CharacterSituation(int stage) {
 		}
 	}
 
-	if (character.weapoon_choose == 0) character.power = 15;
-	if (character.weapoon_choose == 1) character.power = 50;
+	if (character.weapoon_choose == 0) character.power = 15;	// 무기 1번
+	if (character.weapoon_choose == 1) character.power = 50;	// 무기 2번
 
 	GameMapUi(true); // false는 상태창, true는 바닥
 	GameMapUi(false);
@@ -228,7 +228,7 @@ void CharacterSituation(int stage) {
 		// 체력 0밑으로 내려가면 0으로 고정
 		if (character.hp <= 0) {
 			character.hp = 0;
-			GameMapUi(false);
+			GameMapUi(false);  // 끝날 때 체력이 0으로 보이기 위해 한번더 갱신
 			Gameover(false);  // 중간에 죽었기에 false 실패를 보내기
 			Sleep(2000);
 			system("cls");
@@ -250,14 +250,14 @@ void CharacterSituation(int stage) {
 			}
 		}
 		if (stage == 2) {
-			int all_die = true;
+			int all_die = true;		// 몬스터가 전부 죽었는지 여부
 
 			for (int i = 0; i < monster_count; i++) {
 				if (monster_obj != NULL && monster_obj[i].hp > 0) {
-					MonsterDesgin(i);
+					MonsterDesgin(i);		// 피가 없을때 까지 몬스터 별로 디자인 생성
 				}
 			}
-			for (int i = 0; i < monster_count; i++) {
+			for (int i = 0; i < monster_count; i++) {	// 전부 죽었을 경우 all_die true
 				if (monster_obj[i].hp > 0) all_die = false;
 			}
 
@@ -288,7 +288,7 @@ void Gameover(int win) { // you와 die를 같이쓰면 들여쓰기가 돼서 분리
 		Gotoxy(42, 14); printf(" ● ● ● ●      ●     ●    ● ●");
 		Gotoxy(42, 15); printf("  ●   ●     ●●●●●   ●     ●●");
 	}
-	else {
+	else {		// 몬스터에게 죽었을 때
 		Gotoxy(42, 10); printf("●●●●●      ●●●●●   ●●●●●●●●");
 		Gotoxy(42, 11); printf("●     ●      ●     ●");
 		Gotoxy(42, 12); printf("●      ●     ●     ●●●●●●●●");
@@ -315,20 +315,21 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 		if (monster_obj[mon_c].move[0] > delay_jum + 1) monster_obj[mon_c].move[0] = 0;
 
 	}
-	else monster_obj[mon_c].y += gravity;
+	else monster_obj[mon_c].y += gravity;	// 점프하면 다시 내려오도록 y값 증가
 
-	if (monster_obj[mon_c].y >= MAP_Y_MAX) {
+	if (monster_obj[mon_c].y >= MAP_Y_MAX) {	// 맵안으로만 점프
 		monster_obj[mon_c].y = MAP_Y_MAX;
 		monster_obj[mon_c].jum = false;	// 기본 이미지로 변경
 		monster_obj[mon_c].bottem = true;
 	}
 	// 몬스터 어택 관련
 	monster_obj[mon_c].delay++;
+	// 캐릭터가 어택했을 때, 몬스터가 자동 점프하지 않고 바닥에 있으면 실행
 	if (character.attack_mosion[mon_c] && monster_obj[mon_c].delay > 20 && monster_obj[mon_c].jum == false) {
 		// 오른쪽
 		if (direction && monster_obj[mon_c].x >= charact_X && charact_Y - 3 >= monster_obj[mon_c].y - 3) {
 			if (monster_obj[mon_c].x <= charact_X + 7) {
-				monster_obj[mon_c].hp -= character.power;
+				monster_obj[mon_c].hp -= character.power;  // 몬스터 Hp 감소
 				monster_obj[mon_c].move[1] = true;	// 어택했을 때 몬스터 점프
 			}
 			if (monster_obj[mon_c].y < charact_Y - 3) monster_obj[mon_c].hp += 10;	// 몬스터가 캐릭 위에 있는데 공격 했을 경우
@@ -343,19 +344,22 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 		}
 		monster_obj[mon_c].delay = 0;
 	}
+	if (monster_obj[mon_c].hp <= 0) {	// 몬스터를 잡을 때마다 코인 획득
+		character.coin += 20;
+	}
 	character.ch_del++;
 	// 몬스터에게 닿았을 때 캐릭터 hp 감소
 	if (character.ch_del > 20) {
 		if (monster_obj[mon_c].x >= charact_X) {
 			if (monster_obj[mon_c].x <= charact_X + 3 && charact_Y > monster_obj[mon_c].y - 3) {
 				character.hp -= 10;
-				character.ch_del = 0;
+				character.ch_del = 0;	// 캐릭터한태 데미지 입히는 딜레이
 			}
 		}
 		else {
 			if (monster_obj[mon_c].x + 4 >= charact_X && charact_Y > monster_obj[mon_c].y - 3) {
 				character.hp -= 10;
-				character.ch_del = 0;
+				character.ch_del = 0;	// 캐릭터한태 데미지 입히는 딜레이
 			}
 		}
 	}
@@ -373,7 +377,7 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 	}
 }
 
-void GameMapUi(int floor) {
+void GameMapUi(int floor) {		// 맴 바닥과 상태창 디자인
 	if (floor == true) {
 		for (int i = 0; i < MAP_X_MAX; i++) {
 			Gotoxy(i, MAP_Y_MAX + 1);
@@ -423,12 +427,12 @@ void StartMenu() {
 	printf("===================================================================");
 }
 
-void MonsterDesgin(int mon_c) {
+void MonsterDesgin(int mon_c) {		// 몬스터 디자인
 	char mon_spr[13] = " __ (  )----";
-	Gotoxy(monster_obj[mon_c].x, monster_obj[mon_c].y - 3);
+	Gotoxy(monster_obj[mon_c].x, monster_obj[mon_c].y - 3);	// 문자 3개당 한줄로 치기 위해 y + 3
 	printf("%d", monster_obj[mon_c].hp);
 	int next_line = 0;
-	if (monster_obj[mon_c].jum) {
+	if (monster_obj[mon_c].jum) {		// 점프했을 때 모습 변환
 		mon_spr[4] = '['; mon_spr[7] = ']';
 		mon_spr[8] = '\''; mon_spr[11] = '\'';
 	}
@@ -567,7 +571,7 @@ void CharacterClear(int x, int y) {	// 캐릭터 지우기(잔상 제거)
 		Gotoxy(x - 4, y - i); printf("           ");
 	}
 }
-void GameExplanation() {
+void GameExplanation() {	// 게임 도움말
 	int menu = 0;
 	Gotoxy(0, 0);
 	printf("[ 게 임 설 명 ]\n\n");
@@ -623,14 +627,6 @@ void Store() {
 			}
 		}
 	}
-}
-void Gameover(int win) { // you와 die를 같이쓰면 들여쓰기가 돼서 분리
-	Gotoxy(10, 10); printf("●     ●     ●      ●     ●");
-	Gotoxy(10, 11); printf(" ●   ●    ●   ●    ●     ●");
-	Gotoxy(10, 12); printf("  ● ●    ●     ●   ●     ●");
-	Gotoxy(10, 13); printf("   ●     ●     ●   ●     ●");
-	Gotoxy(10, 14); printf("   ●      ●   ●     ●   ● ");
-	Gotoxy(10, 15); printf("   ●        ●        ●●●  ");
 }
 void StageMenu() {
 	int menu = 0;
