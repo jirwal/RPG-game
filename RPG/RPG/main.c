@@ -49,7 +49,7 @@ int main(void) {
 		switch (menu_select)		// 저장한 값을 통해 해당하는 번호로 이동
 		{
 		case MENU_SELECT_ONE:
-			CharacterSituation(1);
+			StageMenu();
 			break;
 		case MENU_SELECT_TWO:
 			Store();
