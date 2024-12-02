@@ -87,7 +87,7 @@ void CharacterSituation(int stage) {
 		// 비동기로 처리 -> 호출된 시점에서 키 상태를 확인
 		// 메시지 큐를 거치지 않고 바로 리턴 해준다
 		// 캐릭터의 움직임을 누르는 즉시 입력 처리하기 위해 사용
-		
+		CharacterClear(charact_X, charact_Y);
 		// 키를 누르면 0x8000값을 리턴 키가 이미 눌려있으면 0x0001값을 리턴
 		// 키눌름 상태를 정확한 시점에서 체크하기위해 AND연산 사용
 		// 키를 누르면 0x8000값을 리턴 키가 이미 눌려있으면 0x0001값을 리턴
@@ -152,6 +152,8 @@ void CharacterSituation(int stage) {
 }
 void CharacterDesgin(int x, int y, int direction, int charact_leg) {
 	char sprite[10] = " 0 (|)_^_";	// 캐릭 초기 디자인
+	char attack_m[13] = "    ---     ";
+	// 다양한 움직임을 위해 printf문으로 안하고 배열에 넣어서 동작 변경
 
 	sprite[4] = '|'; sprite[6] = '_'; sprite[8] = '_';
 
@@ -175,16 +177,92 @@ void CharacterDesgin(int x, int y, int direction, int charact_leg) {
 		case 3: sprite[6] = '_'; sprite[8] = '.'; break;
 		default: break;
 		}
-
-		int next_line = 0;		// 캐릭터 디자인 배열을 3개 단위로 끊어서 출력하기 위한 기준값
-		for (int i = 2; i >= 0; i--) {
-			Gotoxy(x, y - i);
-			for (int j = 0; j < 3; j++) {
-				Gotoxy(x + j, y - i);
-				printf("%c", sprite[next_line + j]);
+	}
+	if (character.weapoon_choose == 0) {	// 기본 무기 일 경우
+		attack_m[4] = '-'; attack_m[5] = '-'; attack_m[6] = '-';
+		if (character.attack_mosion[0]) {	// 어택 버튼을 눌러서 true로 바뀌였을 때 실행
+			for (int i = 0; i < 13; i++)
+				attack_m[i] = ' ';	// 어택할때 기존 무기모양 지우면서 모양 갱신
+			if (direction)
+				sprite[5] = ' ';	// 오른손 표현 모양 지우기
+			else sprite[3] = ' ';	// 왼손
+			switch (character.attack_mosion[1])
+			{
+			case 1: attack_m[0] = 'o'; attack_m[2] = '-'; attack_m[3] = '.'; break;		// 공격 모션 
+			case 2: attack_m[2] = '.'; attack_m[4] = 'o'; attack_m[10] = '\'';
+				if (direction) attack_m[7] = ')';		// 오른쪽을 볼 때
+				else attack_m[7] = '(';					// 왼쪽을 볼 때
+				break;
+			case 3: attack_m[4] = 'o'; attack_m[10] = '-'; attack_m[11] = '\''; break;
+			case 4: attack_m[4] = '-'; attack_m[5] = '-'; attack_m[6] = '-';
+				if (direction) sprite[5] = 'o';			// 오른쪽을 볼 때
+				else sprite[3] = 'o';					// 왼쪽을 볼 때
+				break;
+			case 5: attack_m[4] = 'o'; attack_m[5] = '-'; attack_m[6] = '-'; attack_m[7] = '-'; break;
+			case 6: attack_m[4] = '-'; attack_m[5] = '-'; attack_m[6] = '-';
+				if (direction) sprite[5] = 'o';			// 오른쪽을 볼 때
+				else sprite[3] = 'o';					// 왼쪽을 볼 때
+				break;
+			default: break;
 			}
-			next_line += 3;
 		}
+	}
+	if (character.weapoon_choose == 1) {	// 상점에서 1번 무기를 산 경우
+		attack_m[4] = '+'; attack_m[5] = '-';
+		if (direction) attack_m[6] = '>';
+		else attack_m[6] = '<';
+		if (character.attack_mosion[0]) {	// 어택 버튼을 눌러서 true로 바뀌였을 때 실행
+			for (int i = 0; i < 13; i++)
+				attack_m[i] = ' ';	// 어택할때 기존 무기모양 지우면서 모양 갱신
+			if (direction)
+				sprite[5] = ' ';	// 오른손 표현 모양 지우기
+			else sprite[3] = ' ';	// 왼손
+			switch (character.attack_mosion[1])
+			{
+			case 1: attack_m[0] = 'o'; attack_m[2] = '-'; attack_m[3] = '.'; break;		// 공격 모션 
+			case 2: attack_m[2] = '.'; attack_m[4] = 'o'; attack_m[10] = '\'';
+				if (direction) attack_m[7] = ')';		// 오른쪽을 볼 때
+				else attack_m[7] = '(';					// 왼쪽을 볼 때
+				break;
+			case 3: attack_m[4] = 'o'; attack_m[10] = '-'; attack_m[11] = '\''; break;
+			case 4: attack_m[4] = '+'; attack_m[5] = '-';
+				if (direction) { sprite[5] = 'o'; attack_m[6] = '>'; }	// 오른쪽을 볼 때
+				else { sprite[3] = 'o'; attack_m[6] = '<'; }				// 왼쪽을 볼 때
+				break;
+			case 5: attack_m[4] = 'o'; attack_m[5] = '-'; attack_m[6] = '-'; attack_m[7] = '-'; break;
+			case 6: attack_m[4] = '+'; attack_m[5] = '-';
+				if (direction) { sprite[5] = 'o'; attack_m[6] = '>'; }	// 오른쪽을 볼 때
+				else { sprite[3] = 'o'; attack_m[6] = '<'; }				// 왼쪽을 볼 때
+				break;
+			default: break;
+			}
+		}
+	}
+	// 움직임이 없으면 초기값 출력
+	int next_line = 0;		// 캐릭터 디자인 배열을 3개 단위로 끊어서 출력하기 위한 기준값
+	for (int i = 2; i >= 0; i--) {
+		Gotoxy(x, y - i);
+		for (int j = 0; j < 3; j++) {
+			Gotoxy(x + j, y - i);
+			printf("%c", sprite[next_line + j]);
+		}
+		next_line += 3;
+	}
+	// 무기 줄력 위치
+	next_line = 0;
+	for (int i = 2; i >= 0; i--) {
+		Gotoxy(x, y - i);
+		for (int j = 0; j < 4; j++) {
+			if (direction) {
+				Gotoxy((x + 3) + j, y - i);		// 오른쪽에 무기 생성하기 위해 x좌표에 +3
+				printf("%c", attack_m[next_line + j]);
+			}
+			else {
+				Gotoxy((x - 1) - j, y - i);		// 왼쪽에 무기 생성하기 위해 y좌표에 -1 후 j값 빼기
+				printf("%c", attack_m[next_line + j]);
+			}
+		}
+		next_line += 4;
 	}
 }
 void CharacterClear(int x, int y) {	// 캐릭터 지우기(잔상 제거)
