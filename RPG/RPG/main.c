@@ -8,10 +8,12 @@
 #define MENU_SELECT_THREE 51
 #define MENU_SELECT_FOUR 52
 
+#define BACK 112 // 전 화면으로 되돌아가기
 
 void StartMenu();
 void Gotoxy(int x, int y); // 마우스 커서 위치를 변경하는 함수
 void CursorView(char show);
+void GameExplanation();
 
 int main(void) {
 
@@ -29,7 +31,8 @@ int main(void) {
 
 			break;
 		case MENU_SELECT_THREE:
-
+			GameExplanation();
+			system("cls");
 			break;
 		case MENU_SELECT_FOUR:
 			return 0;
@@ -57,4 +60,21 @@ void CursorView(char show) {	// 커서 보임 유무
 	ConsoleCursor.bVisible = show;
 	ConsoleCursor.dwSize = 1;
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConsoleCursor);
+}
+void GameExplanation() {
+	int menu = 0;
+	Gotoxy(0, 0);
+	printf("[ 게 임 설 명 ]\n\n");
+	printf("1) 스테이지별 몬스터를 잡아 최종 스테이지까지 클리어 하는 게임\n");
+	printf("2) 몬스터를 잡으면 골드를 줍니다.\n");
+	printf("3) 마지막 스테이지는 상점에서 새로운 무기를 사야지만 입장이 가능합니다.\n\n\n");
+	printf("[ 조 작 키 설 명 ]\n\n");
+	printf("  ▲     : 점프(위로 이동)\n");
+	printf("◀   ▶  : 왼쪽 / 오른쪽 이동\n");
+	printf("Space    : 공격");
+	Gotoxy(44, 14); printf("( p : 메뉴로 되돌아가기)");
+
+	while (menu != BACK) {
+		menu = _getch();
+	}
 }
