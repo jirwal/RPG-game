@@ -22,6 +22,7 @@ typedef struct Character {
 	int weapoon_choose;		// 무기 종류
 	int power;				// 데미지
 	int coin;
+	int ch_del;		// 캐릭터 hp 딜레이
 
 }Character;
 typedef struct Monster {
@@ -47,6 +48,7 @@ void GameExplanation();		// 게임 설명 및 조작키 설명
 void Store();				// 상점
 void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c);
 void StageMenu();
+void Gameover(int win);   // 매개변수는 승리거나 실패거나를 받아온다
 
 
 int main(void) {
@@ -105,6 +107,7 @@ void CharacterSituation(int stage) {
 	character.mpmax = 50; // 캐릭터 최대 마나
 	character.hp = character.hpmax;
 	character.mp = character.mpmax;
+	character.ch_del = 0;		// 캐릭터의 어택당하고 다음 어택까지의 딜레이
 	if (stage == 1) {
 		monster_obj = (Monster*)malloc(sizeof(Monster) * 1);
 		if (monster_obj == NULL) return 0;		// 오류로 null값을 할당받으면 종료
@@ -223,8 +226,14 @@ void CharacterSituation(int stage) {
 		if (character.hp > character.hpmax)
 			character.hp = character.hpmax;
 		// 체력 0밑으로 내려가면 0으로 고정
-		if (character.hp <= 0)
+		if (character.hp <= 0) {
 			character.hp = 0;
+			GameMapUi(false);
+			Gameover(false);  // 중간에 죽었기에 false 실패를 보내기
+			Sleep(2000);
+			system("cls");
+			return;
+		}
 
 		GameMapUi(false);
 		CharacterDesgin(charact_X, charact_Y, direction, charact_leg);
@@ -254,11 +263,38 @@ void CharacterSituation(int stage) {
 
 			if (all_die) {
 				free(monster_obj);
+				Gameover(true);	// 몬스터를 전부 처치해서 승리 ( 스테이지 2 )
+				Sleep(2000);
 				system("cls");
 				return;
 			}
 		}
 		Sleep(50);
+	}
+}
+void Gameover(int win) { // you와 die를 같이쓰면 들여쓰기가 돼서 분리
+	Gotoxy(10, 10); printf("●     ●     ●      ●     ●");
+	Gotoxy(10, 11); printf(" ●   ●    ●   ●    ●     ●");
+	Gotoxy(10, 12); printf("  ● ●    ●     ●   ●     ●");
+	Gotoxy(10, 13); printf("   ●     ●     ●   ●     ●");
+	Gotoxy(10, 14); printf("   ●      ●   ●     ●   ● ");
+	Gotoxy(10, 15); printf("   ●        ●        ●●●  ");
+
+	if (win) {		// 스테이지 2를 클리어하면 게임이 클리어 되게 한다
+		Gotoxy(42, 10); printf("●       ●   ●●●●●   ●●     ●");
+		Gotoxy(42, 11); printf("●       ●     ●     ● ●    ●");
+		Gotoxy(42, 12); printf("●   ●   ●     ●     ●  ●   ●");
+		Gotoxy(42, 13); printf("●  ● ●  ●     ●     ●   ●  ●");
+		Gotoxy(42, 14); printf(" ● ● ● ●      ●     ●    ● ●");
+		Gotoxy(42, 15); printf("  ●   ●     ●●●●●   ●     ●●");
+	}
+	else {
+		Gotoxy(42, 10); printf("●●●●●      ●●●●●   ●●●●●●●●");
+		Gotoxy(42, 11); printf("●     ●      ●     ●");
+		Gotoxy(42, 12); printf("●      ●     ●     ●●●●●●●●");
+		Gotoxy(42, 13); printf("●      ●     ●     ●");
+		Gotoxy(42, 14); printf("●     ●      ●     ●");
+		Gotoxy(42, 15); printf("●●●●●      ●●●●●   ●●●●●●●●");
 	}
 }
 
@@ -307,14 +343,21 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 		}
 		monster_obj[mon_c].delay = 0;
 	}
+	character.ch_del++;
 	// 몬스터에게 닿았을 때 캐릭터 hp 감소
-	if (monster_obj[mon_c].x >= charact_X) {
-		if (monster_obj[mon_c].x <= charact_X + 3 && charact_Y > monster_obj[mon_c].y - 3)
-			character.hp -= 1;
-	}
-	else {
-		if (monster_obj[mon_c].x + 4 >= charact_X && charact_Y > monster_obj[mon_c].y - 3)
-			character.hp -= 1;
+	if (character.ch_del > 20) {
+		if (monster_obj[mon_c].x >= charact_X) {
+			if (monster_obj[mon_c].x <= charact_X + 3 && charact_Y > monster_obj[mon_c].y - 3) {
+				character.hp -= 10;
+				character.ch_del = 0;
+			}
+		}
+		else {
+			if (monster_obj[mon_c].x + 4 >= charact_X && charact_Y > monster_obj[mon_c].y - 3) {
+				character.hp -= 10;
+				character.ch_del = 0;
+			}
+		}
 	}
 	// 오른쪽을 보고 때렸을 때
 	if (monster_obj[mon_c].move[1]) {
@@ -571,7 +614,7 @@ void Store() {
 		if (meun_pur == PURCHASE) {
 			if (character.coin >= 20) {
 				character.coin -= 20;
-				Gotoxy(20, 7); printf("[ 구매완료 ]      ");
+				Gotoxy(20, 7); printf("[ 구매완료 ]         ");
 				Gotoxy(0, 0); printf("< 보유 코인 : %d >", character.coin);
 				character.weapoon_choose = 1;
 			}
@@ -618,6 +661,7 @@ void StageMenu() {
 		}
 		if (menu == MENU_SELECT_TWO) {
 			if (character.weapoon_choose == 1) {
+				Gotoxy(30, 12); printf("                        ");
 				CharacterSituation(2);	// 2스테이지 정보 넘기기
 			}
 			else {
