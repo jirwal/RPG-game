@@ -9,6 +9,7 @@
 #define MENU_SELECT_FOUR 52
 
 #define BACK 112 // 전 화면으로 되돌아가기
+#define PURCHASE 105	// 구매 키
 
 void StartMenu();
 void Gotoxy(int x, int y); // 마우스 커서 위치를 변경하는 함수
@@ -28,7 +29,8 @@ int main(void) {
 
 			break;
 		case MENU_SELECT_TWO:
-
+			Store();
+			system("cls");
 			break;
 		case MENU_SELECT_THREE:
 			GameExplanation();
@@ -76,5 +78,44 @@ void GameExplanation() {
 
 	while (menu != BACK) {
 		menu = _getch();
+	}
+}
+void Store() {
+	int meun_pur = 0;
+	int coin = 0;
+	printf("< 보유 코인 : %d >", coin);
+	for (int i = 3; i < 10; i++) {
+		Gotoxy(5, i); printf("|                                              |");
+		if (i == 3) {
+			Gotoxy(5, i);
+			printf(".ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ.");
+		}
+		if (i == 9) {
+			Gotoxy(5, i);
+			printf("\'ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ\'");
+		}
+	}
+
+	Gotoxy(13, 5); printf("/");
+	Gotoxy(12, 6); printf("/");
+	Gotoxy(10, 7); printf("\'+.");
+
+	Gotoxy(20, 5); printf("데미지 : 40");
+	Gotoxy(20, 6); printf("가격 : 20 coin");
+	Gotoxy(20, 7); printf("[ 구매 : i버튼 클릭 ]");
+	Gotoxy(30, 12); printf("( p : 메뉴로 되돌아가기)");
+
+	while (meun_pur != BACK) {
+		meun_pur = _getch();
+		if (meun_pur == PURCHASE) {
+			if (coin >= 20) {
+				coin -= 20;
+				Gotoxy(20, 7); printf("[ 구매완료 ]      ");
+				Gotoxy(0, 0); printf("< 보유 코인 : %d >", coin);
+			}
+			else {
+				Gotoxy(22, 8); printf("* 코인이 부족합니다.");
+			}
+		}
 	}
 }
