@@ -129,6 +129,20 @@ void CharacterSituation(int stage) {
 		if (charact_leg > 3)
 			charact_leg = 1;
 
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+			character.attack_mosion[0] = true;
+			character.attack_mosion[1]++;	// 무기 모션 (추후에 바꿀것)-----------
+		}
+		if (character.attack_mosion[1] > 6)	// 5개의 공격 모션이 끝나면 처음부터 이동
+			character.attack_mosion[1] = 0;
+
+		// 최대 체력 넘어가면 최대체력에서 고정
+		if (character.hp > character.hpmax)
+			character.hp = character.hpmax;
+		// 체력 0밑으로 내려가면 0으로 고정
+		if (character.hp <= 0)
+			character.hp = 0;
+
 		GameMapUi(false);
 		CharacterDesgin(charact_X, charact_Y, direction, charact_leg);
 		Sleep(50);
