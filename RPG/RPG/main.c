@@ -48,6 +48,7 @@ void GameExplanation();		// 게임 설명 및 조작키 설명
 void Store();				// 상점
 void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c);
 void StageMenu();
+void Gameover(int win);   // 매개변수는 승리거나 실패거나를 받아온다
 
 
 int main(void) {
@@ -225,8 +226,14 @@ void CharacterSituation(int stage) {
 		if (character.hp > character.hpmax)
 			character.hp = character.hpmax;
 		// 체력 0밑으로 내려가면 0으로 고정
-		if (character.hp <= 0)
+		if (character.hp <= 0) {
 			character.hp = 0;
+			GameMapUi(false);
+			Gameover(false);  // 중간에 죽었기에 false 실패를 보내기
+			Sleep(2000);
+			system("cls");
+			return;
+		}
 
 		GameMapUi(false);
 		CharacterDesgin(charact_X, charact_Y, direction, charact_leg);
@@ -256,11 +263,38 @@ void CharacterSituation(int stage) {
 
 			if (all_die) {
 				free(monster_obj);
+				Gameover(true);	// 몬스터를 전부 처치해서 승리 ( 스테이지 2 )
+				Sleep(2000);
 				system("cls");
 				return;
 			}
 		}
 		Sleep(50);
+	}
+}
+void Gameover(int win) { // you와 die를 같이쓰면 들여쓰기가 돼서 분리
+	Gotoxy(10, 10); printf("●     ●     ●      ●     ●");
+	Gotoxy(10, 11); printf(" ●   ●    ●   ●    ●     ●");
+	Gotoxy(10, 12); printf("  ● ●    ●     ●   ●     ●");
+	Gotoxy(10, 13); printf("   ●     ●     ●   ●     ●");
+	Gotoxy(10, 14); printf("   ●      ●   ●     ●   ● ");
+	Gotoxy(10, 15); printf("   ●        ●        ●●●  ");
+
+	if (win) {		// 스테이지 2를 클리어하면 게임이 클리어 되게 한다
+		Gotoxy(42, 10); printf("●       ●   ●●●●●   ●●     ●");
+		Gotoxy(42, 11); printf("●       ●     ●     ● ●    ●");
+		Gotoxy(42, 12); printf("●   ●   ●     ●     ●  ●   ●");
+		Gotoxy(42, 13); printf("●  ● ●  ●     ●     ●   ●  ●");
+		Gotoxy(42, 14); printf(" ● ● ● ●      ●     ●    ● ●");
+		Gotoxy(42, 15); printf("  ●   ●     ●●●●●   ●     ●●");
+	}
+	else {
+		Gotoxy(42, 10); printf("●●●●●      ●●●●●   ●●●●●●●●");
+		Gotoxy(42, 11); printf("●     ●      ●     ●");
+		Gotoxy(42, 12); printf("●      ●     ●     ●●●●●●●●");
+		Gotoxy(42, 13); printf("●      ●     ●     ●");
+		Gotoxy(42, 14); printf("●     ●      ●     ●");
+		Gotoxy(42, 15); printf("●●●●●      ●●●●●   ●●●●●●●●");
 	}
 }
 
@@ -314,13 +348,13 @@ void MonsterSituation(int direction, int charact_X, int charact_Y, int mon_c) {
 	if (character.ch_del > 20) {
 		if (monster_obj[mon_c].x >= charact_X) {
 			if (monster_obj[mon_c].x <= charact_X + 3 && charact_Y > monster_obj[mon_c].y - 3) {
-				character.hp -= 20;
+				character.hp -= 10;
 				character.ch_del = 0;
 			}
 		}
 		else {
 			if (monster_obj[mon_c].x + 4 >= charact_X && charact_Y > monster_obj[mon_c].y - 3) {
-				character.hp -= 20;
+				character.hp -= 10;
 				character.ch_del = 0;
 			}
 		}
