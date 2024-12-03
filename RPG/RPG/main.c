@@ -23,6 +23,7 @@ typedef struct Character {
 	int power;				// 데미지
 	int coin;
 	int ch_del;		// 캐릭터 hp 딜레이
+	int weapoon_pur;		// 무기 구매 여부 (현재는 구매 무기가 1개이기에 단일로 할당)
 
 }Character;
 typedef struct Monster {
@@ -56,6 +57,7 @@ int main(void) {
 	CursorView(0);
 	character.coin = 20;
 	character.weapoon_choose = 0; // 기본 무기 상태 
+	character.weapoon_pur = false;		// 무기 구매여부 
 
 	while (true) {
 		StartMenu();
@@ -608,22 +610,28 @@ void Store() {
 	Gotoxy(12, 6); printf("/");
 	Gotoxy(10, 7); printf("\'+.");
 
-	Gotoxy(20, 5); printf("데미지 : 40");
+	Gotoxy(20, 5); printf("데미지 : 50");
 	Gotoxy(20, 6); printf("가격 : 20 coin");
 	Gotoxy(20, 7); printf("[ 구매 : i버튼 클릭 ]");
 	Gotoxy(30, 12); printf("( p : 메뉴로 되돌아가기)");
+	if (character.weapoon_pur) {
+		Gotoxy(20, 7); printf("[ 구매완료 ]         ");
+	}
 
 	while (meun_pur != BACK) {
 		meun_pur = _getch();
-		if (meun_pur == PURCHASE) {
-			if (character.coin >= 20) {
-				character.coin -= 20;
-				Gotoxy(20, 7); printf("[ 구매완료 ]         ");
-				Gotoxy(0, 0); printf("< 보유 코인 : %d >", character.coin);
-				character.weapoon_choose = 1;
-			}
-			else {
-				Gotoxy(22, 8); printf("* 코인이 부족합니다.");
+		if (character.weapoon_pur == false) {
+			if (meun_pur == PURCHASE) {
+				if (character.coin >= 20) {
+					character.coin -= 20;
+					Gotoxy(20, 7); printf("[ 구매완료 ]         ");
+					Gotoxy(0, 0); printf("< 보유 코인 : %d >", character.coin);
+					character.weapoon_choose = 1;
+					character.weapoon_pur = true;
+				}
+				else {
+					Gotoxy(22, 8); printf("* 코인이 부족합니다.");
+				}
 			}
 		}
 	}
